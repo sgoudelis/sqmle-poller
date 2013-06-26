@@ -12,8 +12,8 @@ public class SQMLEPoller {
 		SQMLE sqmle;
 
 		while (true) {
-			sqmle = new SQMLE("sqm-le.nerv.home", 10001, "teleport");
-			//sqmle = new SQMLE("localhost", 10001, "teleport");
+			sqmle = new SQMLE("sqm-le.nerv.home", 10001);
+			//sqmle = new SQMLE("localhost", 10001);
 			try {
 				sqmle.getReadings();
 			} catch (ConnectException e) {
