@@ -2,6 +2,8 @@ package gr.nerv.services.sqm.poller;
 import java.io.StringReader;
 import au.com.bytecode.opencsv.CSVReader;
 
+
+
 public class SQMLE {
 	protected String ip;
 	protected int port;
