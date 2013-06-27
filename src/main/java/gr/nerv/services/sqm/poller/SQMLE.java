@@ -25,18 +25,30 @@ public class SQMLE {
 	 * @param args
 	 * @throws Exception
 	 */
+	/**
+	 * @param ip
+	 * @param port
+	 * @param password
+	 */
 	public SQMLE(String ip, int port, String password) {
 		this.ip = ip;
 		this.port = port;
 		this.password = password;
 	}
 	
+	/**
+	 * @param ip
+	 * @param port
+	 */
 	public SQMLE(String ip, int port) {
 		this.ip = ip;
 		this.port = port;
 		this.password = "";
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public void getReadings() throws Exception {
 		this.connector = new SQMLEConnector(ip, port, password);
 
