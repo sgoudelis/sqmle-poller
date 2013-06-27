@@ -2,6 +2,12 @@ package gr.nerv.services.sqm.poller;
 import java.io.StringReader;
 import au.com.bytecode.opencsv.CSVReader;
 
+/**
+ * SQM-LE device class
+ * Provides high-level (device level) communication
+ * @author Stratos Goudelis
+ *
+ */
 public class SQMLE {
 	protected String ip;
 	protected int port;

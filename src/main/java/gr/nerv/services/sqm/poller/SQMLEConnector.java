@@ -4,6 +4,8 @@ import java.net.*;
 import java.io.*;
 
 /**
+ * SQM-LE connector class
+ * Provides low-level communication methods to the device
  * @author Stratos Goudelis
  * Based on tcpip.java from Unihedron
  *

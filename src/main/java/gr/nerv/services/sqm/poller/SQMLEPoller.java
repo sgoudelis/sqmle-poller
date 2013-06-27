@@ -3,6 +3,12 @@ package gr.nerv.services.sqm.poller;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 
+/**
+ * SQM-LE poller application
+ * Uses SQMLE class for communication
+ * @author Stratos Goudelis
+ *
+ */
 public class SQMLEPoller {
 
 	/**
