@@ -3,10 +3,15 @@ package gr.nerv.services.sqm.poller;
 import java.net.*;
 import java.io.*;
 
+/**
+ * @author Stratos Goudelis
+ * Based on tcpip.java from Unihedron
+ *
+ */
 public class SQMLEConnector {
 	protected Socket socket = null;
-	public DataInputStream dis = null;
-	protected DataOutputStream dos = null;
+	public DataInputStream socketInput = null;
+	protected DataOutputStream socketOutput = null;
 	protected String ip;
 	protected int port;
 	protected String password;
@@ -15,9 +20,18 @@ public class SQMLEConnector {
 	protected int loopTime = 50;
 	protected int waitTimeThreshold = 2000;
 
+	/**
+	 * @param ip
+	 * @param port
+	 * @param password
+	 * @throws SQMLEException
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 */
 	public SQMLEConnector(String ip, int port, String password)
 			throws SQMLEException, UnknownHostException, IOException {
-		Socket s1 = null;
+		
+		Socket testSocket = null;
 		this.ip = ip;
 		this.port = port;
 		this.password = password;
@@ -29,24 +43,27 @@ public class SQMLEConnector {
 			throw new SQMLEException("Error connecting to SQM-LE device ("+e.getMessage()+")");
 		}
 
-		s1 = new Socket(ipa.getHostAddress(), port);
-		s1.setKeepAlive(true);
+		testSocket = new Socket(ipa.getHostAddress(), port);
+		testSocket.setKeepAlive(true);
 
-		socket = s1;
+		socket = testSocket;
 		try { // Create an input stream
-			dis = new DataInputStream(new BufferedInputStream(
+			socketInput = new DataInputStream(new BufferedInputStream(
 					socket.getInputStream()));
 		} catch (Exception ex) {
 			throw new SQMLEException("Error creating input stream");
 		}
 		try { // Create an output stream
-			dos = new DataOutputStream(new BufferedOutputStream(
+			socketOutput = new DataOutputStream(new BufferedOutputStream(
 					socket.getOutputStream()));
 		} catch (Exception ex) {
 			throw new SQMLEException("Error creating output stream");
 		}
 	}
 
+	/**
+	 * @throws SQMLEException
+	 */
 	public synchronized void sendPassword() throws SQMLEException {
 		if (!this.password.isEmpty()) {
 			// check if device asks for password
@@ -74,11 +91,11 @@ public class SQMLEConnector {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * gr.hiverse.services.sqmle.poller.SQMLEInterface#sendCmd(java.lang.String)
+	/**
+	 * @param cmd
+	 * @param timeout
+	 * @return
+	 * @throws SQMLEException
 	 */
 	public synchronized String sendCmd(String cmd, int timeout)
 			throws SQMLEException {
@@ -93,10 +110,8 @@ public class SQMLEConnector {
 		return response;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
 	 * 
-	 * @see gr.hiverse.services.sqmle.poller.SQMLEInterface#disconnect()
 	 */
 	public synchronized void disconnect() {
 		if (socket != null) {
@@ -107,29 +122,36 @@ public class SQMLEConnector {
 		}
 	}
 
+	/**
+	 * @param temp
+	 * @throws SQMLEException
+	 */
 	public synchronized void send(byte[] temp) throws SQMLEException {
 		try {
-			dos.write(temp, 0, temp.length);
-			dos.flush();
+			socketOutput.write(temp, 0, temp.length);
+			socketOutput.flush();
 		} catch (Exception ex) {
 			throw new SQMLEException("Error sending data : " + ex.toString());
 		}
 	}
 
+	/**
+	 * @param temp
+	 * @param len
+	 * @throws SQMLEException
+	 */
 	public synchronized void send(byte[] temp, int len) throws SQMLEException {
 		try {
-			dos.write(temp, 0, len);
-			dos.flush();
+			socketOutput.write(temp, 0, len);
+			socketOutput.flush();
 		} catch (Exception ex) {
 			throw new SQMLEException("Error sending data : " + ex.toString());
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * gr.hiverse.services.sqmle.poller.SQMLEInterface#send(java.lang.String)
+	/**
+	 * @param given
+	 * @throws SQMLEException
 	 */
 	public synchronized void send(String given) throws SQMLEException {
 		given = given + "\r\n";
@@ -143,10 +165,12 @@ public class SQMLEConnector {
 		send(retvalue);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gr.hiverse.services.sqmle.poller.SQMLEInterface#receive(boolean)
+	/**
+	 * @param forgive
+	 * @param timeout
+	 * @return
+	 * @throws SQMLEException
+	 * @throws SQMLETimeOutException
 	 */
 	public synchronized String receive(boolean forgive, int timeout)
 			throws SQMLEException, SQMLETimeOutException {
@@ -154,15 +178,15 @@ public class SQMLEConnector {
 		byte[] retval = new byte[0];
 		int totalWaitTime = 0;
 		try {
-			while (dis.available() == 0) {
+			while (socketInput.available() == 0) {
 				// waiting
 				try {
 					Thread.sleep(this.loopTime);
 					totalWaitTime = totalWaitTime + this.loopTime;
 					if (totalWaitTime >= timeout && !forgive) {
 						// no answer within time period, close everything
-						this.dis.close();
-						this.dos.close();
+						this.socketInput.close();
+						this.socketOutput.close();
 						this.socket.close();
 						throw new SQMLEException(
 								"Connection closed or wrong password");
@@ -180,12 +204,12 @@ public class SQMLEConnector {
 			throw new SQMLEException(e);
 		}
 		try {
-			retval = new byte[dis.available()];
+			retval = new byte[socketInput.available()];
 		} catch (IOException e) {
 			throw new SQMLEException(e);
 		}
 		try {
-			dis.read(retval);
+			socketInput.read(retval);
 		} catch (IOException e) {
 			throw new SQMLEException(e);
 		}
@@ -195,16 +219,15 @@ public class SQMLEConnector {
 		return (response);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see gr.hiverse.services.sqmle.poller.SQMLEInterface#available()
+	/**
+	 * @return
+	 * @throws SQMLEException
 	 */
 	public int available() throws SQMLEException {
 		int avail;
 		avail = 0;
 		try {
-			avail = dis.available();
+			avail = socketInput.available();
 		} catch (IOException e) {
 			System.out.println("not avail");
 			throw new SQMLEException(e);
