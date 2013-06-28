@@ -2,6 +2,10 @@ package gr.nerv.services.sqm.poller;
 
 import java.net.ConnectException;
 import java.net.UnknownHostException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * SQM-LE poller application
@@ -16,10 +20,27 @@ public class SQMLEPoller {
 	 */
 	public static void main(String[] args) {
 		SQMLE sqmle;
+		String configFile = "poller.properties";
 
+		// new properties object
+		Properties settings = new Properties();
+		
+		try {
+			// load a properties file
+			settings.load(new FileInputStream(configFile));
+
+		} catch (NullPointerException settingsEx) {
+			System.out.println("pipes2");
+			settingsEx.printStackTrace();
+		} catch (FileNotFoundException settingsEx) {
+			System.out.println("Could not find properties file: "+configFile);
+		} catch (IOException settingsEx) {
+			System.out.println("pipes");
+			settingsEx.printStackTrace();
+		}
+		
 		while (true) {
-			sqmle = new SQMLE("sqm-le.nerv.home", 10001);
-			//sqmle = new SQMLE("localhost", 10001);
+			sqmle = new SQMLE(settings.getProperty("host"), Integer.parseInt(settings.getProperty("port")), settings.getProperty("password"));
 			try {
 				sqmle.getReadings();
 			} catch (ConnectException e) {
@@ -46,5 +67,4 @@ public class SQMLEPoller {
 			}
 		}
 	}
-
 }

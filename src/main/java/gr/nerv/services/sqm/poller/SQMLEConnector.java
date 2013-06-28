@@ -67,7 +67,7 @@ public class SQMLEConnector {
 	 * @throws SQMLEException
 	 */
 	public synchronized void sendPassword() throws SQMLEException {
-		if (!this.password.isEmpty()) {
+		if (this.password != null) {
 			// check if device asks for password
 			String buffer = "";
 			try {
