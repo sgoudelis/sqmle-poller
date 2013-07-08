@@ -1,6 +1,6 @@
 package gr.nerv.services.sqm.poller;
 
-public class SQMLEException extends Exception {
+public class SQMLEPasswordException extends Exception {
 
 	/**
 	 * Generic SQMLE device exception class, for later
@@ -10,14 +10,14 @@ public class SQMLEException extends Exception {
 	/**
 	 * 
 	 */
-	public SQMLEException() {
+	public SQMLEPasswordException() {
 		super();
 	}
 
 	/**
 	 * @param message
 	 */
-	public SQMLEException(String message) {
+	public SQMLEPasswordException(String message) {
 		super(message);
 	}
 
@@ -25,14 +25,14 @@ public class SQMLEException extends Exception {
 	 * @param message
 	 * @param cause
 	 */
-	public SQMLEException(String message, Throwable cause) {
+	public SQMLEPasswordException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
 	 * @param cause
 	 */
-	public SQMLEException(Throwable cause) {
+	public SQMLEPasswordException(Throwable cause) {
 		super(cause);
 	}
 

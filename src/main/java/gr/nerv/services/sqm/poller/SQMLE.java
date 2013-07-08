@@ -1,5 +1,7 @@
 package gr.nerv.services.sqm.poller;
 import java.io.StringReader;
+import java.net.UnknownHostException;
+
 import au.com.bytecode.opencsv.CSVReader;
 
 /**
@@ -55,13 +57,15 @@ public class SQMLE {
 	/**
 	 * @throws Exception
 	 */
-	public void getReadings() throws Exception {
+	public void getReadings() throws Exception, UnknownHostException, SQMLEPasswordException {
 		this.connector = new SQMLEConnector(ip, port, password);
+		
+		this.connector.connect();
 
 		try {
 			this.connector.sendPassword();
 		} catch (SQMLEException e) {
-			e.printStackTrace();
+			throw new SQMLEPasswordException("Error sending password");
 		}
 		
 		Thread.sleep(100);
@@ -98,12 +102,10 @@ public class SQMLE {
 			this.magPerSqAS = Float.parseFloat(sampleList[1].substring(0, 6));
 			this.frequency = Long.parseLong(sampleList[2].substring(0, 10));
 			this.periodCount = Long.parseLong(sampleList[3].substring(0, 10));
-			this.periodSeconds = Double.parseDouble(sampleList[4].substring(0,
-					10));
-			this.temperature = Float.parseFloat(sampleList[5].substring(0, 4));
+			this.periodSeconds = Double.parseDouble(sampleList[4].substring(0, 10));
+			this.temperature = Float.parseFloat(sampleList[5].replace("C", ""));
 		} catch (SQMLEException e) {
-			throw new Exception("Something went wrong sending command rx: "
-					+ e.getMessage());
+			throw new Exception("Something went wrong sending command rx: " + e.getMessage());
 		}
 		this.connector.disconnect();
 	}

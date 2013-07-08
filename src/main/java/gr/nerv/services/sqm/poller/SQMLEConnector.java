@@ -17,11 +17,11 @@ public class SQMLEConnector {
 	protected String ip;
 	protected int port;
 	protected String password;
-	private InetAddress ipa;
 	protected boolean passwordSend;
 	protected int loopTime = 50;
 	protected int waitTimeThreshold = 2000;
-
+	private InetAddress ipa;
+	
 	/**
 	 * @param ip
 	 * @param port
@@ -30,41 +30,28 @@ public class SQMLEConnector {
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	public SQMLEConnector(String ip, int port, String password)
-			throws SQMLEException, UnknownHostException, IOException {
-		
-		Socket testSocket = null;
+	public SQMLEConnector(String ip, int port, String password) {
 		this.ip = ip;
 		this.port = port;
 		this.password = password;
 		this.passwordSend = false;
-
-		try {
-			this.ipa = InetAddress.getByName(ip);
-		} catch (UnknownHostException e) {
-			throw new SQMLEException("Error connecting to SQM-LE device ("+e.getMessage()+")");
-		}
-
+	}
+	
+	
+	public synchronized void connect() throws SQMLEException, UnknownHostException, IOException {
+		this.ipa = InetAddress.getByName(ip);
+		
+		Socket testSocket = null;
 		testSocket = new Socket(ipa.getHostAddress(), port);
 		testSocket.setKeepAlive(true);
 
 		socket = testSocket;
-		try { // Create an input stream
-			socketInput = new DataInputStream(new BufferedInputStream(
-					socket.getInputStream()));
-		} catch (Exception ex) {
-			throw new SQMLEException("Error creating input stream");
-		}
-		try { // Create an output stream
-			socketOutput = new DataOutputStream(new BufferedOutputStream(
-					socket.getOutputStream()));
-		} catch (Exception ex) {
-			throw new SQMLEException("Error creating output stream");
-		}
+		this.socketInput = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+		this.socketOutput = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 	}
 
-	/**
-	 * @throws SQMLEException
+	/* (non-Javadoc)
+	 * @see gr.nerv.services.sqm.poller.ISocket#sendPassword()
 	 */
 	public synchronized void sendPassword() throws SQMLEException {
 		if (this.password != null) {
@@ -93,11 +80,8 @@ public class SQMLEConnector {
 		}
 	}
 
-	/**
-	 * @param cmd
-	 * @param timeout
-	 * @return
-	 * @throws SQMLEException
+	/* (non-Javadoc)
+	 * @see gr.nerv.services.sqm.poller.ISocket#sendCmd(java.lang.String, int)
 	 */
 	public synchronized String sendCmd(String cmd, int timeout)
 			throws SQMLEException {
@@ -112,8 +96,8 @@ public class SQMLEConnector {
 		return response;
 	}
 
-	/**
-	 * 
+	/* (non-Javadoc)
+	 * @see gr.nerv.services.sqm.poller.ISocket#disconnect()
 	 */
 	public synchronized void disconnect() {
 		if (socket != null) {
@@ -124,9 +108,8 @@ public class SQMLEConnector {
 		}
 	}
 
-	/**
-	 * @param temp
-	 * @throws SQMLEException
+	/* (non-Javadoc)
+	 * @see gr.nerv.services.sqm.poller.ISocket#send(byte[])
 	 */
 	public synchronized void send(byte[] temp) throws SQMLEException {
 		try {
@@ -137,10 +120,8 @@ public class SQMLEConnector {
 		}
 	}
 
-	/**
-	 * @param temp
-	 * @param len
-	 * @throws SQMLEException
+	/* (non-Javadoc)
+	 * @see gr.nerv.services.sqm.poller.ISocket#send(byte[], int)
 	 */
 	public synchronized void send(byte[] temp, int len) throws SQMLEException {
 		try {
@@ -151,9 +132,8 @@ public class SQMLEConnector {
 		}
 	}
 
-	/**
-	 * @param given
-	 * @throws SQMLEException
+	/* (non-Javadoc)
+	 * @see gr.nerv.services.sqm.poller.ISocket#send(java.lang.String)
 	 */
 	public synchronized void send(String given) throws SQMLEException {
 		given = given + "\r\n";
@@ -167,12 +147,8 @@ public class SQMLEConnector {
 		send(retvalue);
 	}
 
-	/**
-	 * @param forgive
-	 * @param timeout
-	 * @return
-	 * @throws SQMLEException
-	 * @throws SQMLETimeOutException
+	/* (non-Javadoc)
+	 * @see gr.nerv.services.sqm.poller.ISocket#receive(boolean, int)
 	 */
 	public synchronized String receive(boolean forgive, int timeout)
 			throws SQMLEException, SQMLETimeOutException {
@@ -221,9 +197,8 @@ public class SQMLEConnector {
 		return (response);
 	}
 
-	/**
-	 * @return
-	 * @throws SQMLEException
+	/* (non-Javadoc)
+	 * @see gr.nerv.services.sqm.poller.ISocket#available()
 	 */
 	public int available() throws SQMLEException {
 		int avail;

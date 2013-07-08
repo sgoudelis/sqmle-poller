@@ -28,7 +28,6 @@ public class SQMLEPoller {
 		try {
 			// load a properties file
 			settings.load(new FileInputStream(configFile));
-
 		} catch (NullPointerException settingsEx) {
 			System.out.println("pipes2");
 			settingsEx.printStackTrace();
@@ -40,24 +39,32 @@ public class SQMLEPoller {
 		}
 		
 		while (true) {
-			sqmle = new SQMLE(settings.getProperty("host"), Integer.parseInt(settings.getProperty("port")), settings.getProperty("password"));
+			String deviceHost = settings.getProperty("host");
+			int devicePort = Integer.parseInt(settings.getProperty("port"));
+			String devicePassword = settings.getProperty("password");
+			
+			sqmle = new SQMLE(deviceHost, devicePort, devicePassword);
 			try {
 				sqmle.getReadings();
-			} catch (ConnectException e) {
-				System.out.println("Could not connect to SQM-LE device ("+e.getMessage()+")");
-				break;
 			} catch (UnknownHostException e) {
-				System.out.println("Could not connect to SQM-LE device ("+e.getMessage()+")");
+				System.out.println(String.format("Could not resolve host %s:%s (%s)", deviceHost, devicePort, e.getMessage()));
+				break;
+			} catch (ConnectException e) {
+				System.out.println(String.format("Could not connect to SQM-LE device %s:%s (%s)", deviceHost, devicePort, e.getMessage()));
+				break;
+			} catch (SQMLEPasswordException e) {
+				System.out.println(String.format("Could not send password to SQM-LE device %s:%s (%s)", deviceHost, devicePort, e.getMessage()));
 				break;
 			} catch (Exception e) {
 				e.printStackTrace();
-				continue;
+				break;
 			}
 			
 			System.out.println("serial: " + sqmle.serialNumber + " "
 					+ sqmle.magPerSqAS + "mag/arcsec^2 " + sqmle.frequency
 					+ "Hz " + sqmle.periodCount + "c " + sqmle.periodSeconds
 					+ "s " + sqmle.temperature + "C");
+			
 			sqmle = null;
 			try {
 				Thread.sleep(1000);
